@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Loader2, Heart, ExternalLink, ImageOff } from "lucide-react";
+import { Search, Loader2, Heart, ExternalLink, ImageOff, Contrast } from "lucide-react";
 
 const C = {
   paper: "#F3EEE1",
@@ -24,6 +24,16 @@ export default function ReferenceLibrary() {
   const [view, setView] = useState("search"); // search | board
   const [saved, setSaved] = useState([]);
   const [searched, setSearched] = useState(false);
+  const [bwSet, setBwSet] = useState(() => new Set());
+
+  function toggleBw(id) {
+    setBwSet((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   useEffect(() => {
     try {
@@ -161,7 +171,11 @@ export default function ReferenceLibrary() {
                   src={item.thumbUrl}
                   alt={item.title}
                   loading="lazy"
-                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                  style={{
+                    width: "100%", height: "100%", objectFit: "cover", display: "block",
+                    filter: bwSet.has(item.id) ? "grayscale(1) contrast(1.08)" : "none",
+                    transition: "filter .15s ease",
+                  }}
                 />
                 <button
                   onClick={() => toggleSave(item)}
@@ -172,6 +186,17 @@ export default function ReferenceLibrary() {
                   }}
                 >
                   <Heart size={14} color={isSaved(item) ? C.red : C.inkFaint} fill={isSaved(item) ? C.red : "none"} />
+                </button>
+                <button
+                  onClick={() => toggleBw(item.id)}
+                  title="הצגה בשחור-לבן (לתרגול גוונים)"
+                  style={{
+                    position: "absolute", top: 6, right: 6, width: 28, height: 28, borderRadius: "50%",
+                    border: "none", background: bwSet.has(item.id) ? C.ink : "rgba(255,255,255,0.9)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  <Contrast size={14} color={bwSet.has(item.id) ? "#fff" : C.inkFaint} />
                 </button>
               </div>
               <div style={{ padding: "8px 10px" }}>
